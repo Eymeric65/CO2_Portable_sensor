@@ -1,0 +1,4 @@
+../Core/Src/Display_EPD_W21_spi.c:12:6:SPI_Delay	2
+../Core/Src/Display_EPD_W21_spi.c:40:6:SPI_Write	1
+../Core/Src/Display_EPD_W21_spi.c:49:6:EPD_W21_WriteCMD	1
+../Core/Src/Display_EPD_W21_spi.c:57:6:EPD_W21_WriteDATA	1

@@ -1,0 +1,12 @@
+../Core/Src/CO2_probe.c:21:9:modify_bit	24	static
+../Core/Src/CO2_probe.c:29:9:get_bit	16	static
+../Core/Src/CO2_probe.c:33:6:Set_pixel	32	static
+../Core/Src/CO2_probe.c:43:9:countDigits	32	static
+../Core/Src/CO2_probe.c:58:6:getDecimalDigits	32	static
+../Core/Src/CO2_probe.c:69:6:Write_num	40	static
+../Core/Src/CO2_probe.c:96:8:Zone_Write_nums	72	static
+../Core/Src/CO2_probe.c:159:6:Save_data	40	static
+../Core/Src/CO2_probe.c:171:6:Wipe_TextZone	40	static
+../Core/Src/CO2_probe.c:183:6:Write_nums	80	dynamic
+../Core/Src/CO2_probe.c:200:6:Display_Text	128	dynamic
+../Core/Src/CO2_probe.c:232:19:Send_I2C_Command	48	static

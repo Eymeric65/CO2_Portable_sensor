@@ -1,0 +1,26 @@
+/*
+ * Display_EDO_W21.c
+ *
+ *  Created on: Jun 12, 2024
+ *      Author: Utilisateur
+ */
+
+#include "Display_EPD_W21_spi.h"
+
+extern SPI_HandleTypeDef hspi1;
+
+void EPD_W21_WriteCMD(uint8_t command)
+{
+	EPD_W21_CS_0;
+	EPD_W21_DC_0;  // D/C#   0:command  1:data
+	HAL_SPI_Transmit(&hspi1, &command, 1, 100);
+	EPD_W21_CS_1;
+}
+//SPI write data
+void EPD_W21_WriteDATA(uint8_t datas)
+{
+	EPD_W21_CS_0;
+	EPD_W21_DC_1;  // D/C#   0:command  1:data
+	HAL_SPI_Transmit(&hspi1, &datas, 1, 100);
+	EPD_W21_CS_1;
+}
