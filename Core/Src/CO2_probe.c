@@ -8,7 +8,7 @@
 #include "Display_EPD_W21.h"
 #include <string.h>
 #include <stdlib.h>
-
+#include <main.h>
 #include "stm32l0xx_hal.h"
 /* Coord going from top right do bottom left from 0,0 to EPD_HEIGHT,EDP_WIDTH
  *
@@ -236,4 +236,103 @@ HAL_StatusTypeDef Send_I2C_Command(I2C_HandleTypeDef *hi2c, uint16_t DevAddress,
 
 	//return HAL_I2C_Master_Transmit(hi2c, DevAddress, (uint8_t*)&command,2, 500);
 	return HAL_I2C_Master_Transmit(hi2c, DevAddress, comm,2, 500);
+}
+
+void SCREEN_GPIO_Act(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+/* USER CODE BEGIN MX_GPIO_Init_1 */
+/* USER CODE END MX_GPIO_Init_1 */
+
+  /* GPIO Ports Clock Enable */
+
+  /*Configure GPIO pin Output Level */
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(Screen_CS_GPIO_Port, Screen_CS_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, Screen_PWR_Pin, GPIO_PIN_RESET); // Activate the screen
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, D_C_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(Screen_Res_GPIO_Port, Screen_Res_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : CO2_PWR_Pin Screen_CS_Pin */
+  GPIO_InitStruct.Pin = Screen_CS_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : Screen_PWR_Pin SD_PWR_Pin SD_CS_Pin D_C_Pin */
+  GPIO_InitStruct.Pin = D_C_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : Screen_Busy_Pin */
+  GPIO_InitStruct.Pin = Screen_Busy_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(Screen_Busy_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : Screen_Res_Pin */
+  GPIO_InitStruct.Pin = Screen_Res_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(Screen_Res_GPIO_Port, &GPIO_InitStruct);
+
+}
+
+void SCREEN_GPIO_Deact(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+/* USER CODE BEGIN MX_GPIO_Init_1 */
+/* USER CODE END MX_GPIO_Init_1 */
+
+  HAL_GPIO_WritePin(Screen_CS_GPIO_Port, Screen_CS_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, Screen_PWR_Pin, GPIO_PIN_SET); // Deactivate the screen
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, D_C_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(Screen_Res_GPIO_Port, Screen_Res_Pin, GPIO_PIN_RESET);
+
+  /* GPIO Ports Clock Enable */
+
+  /*Configure GPIO pin Output Level */
+  /*Configure GPIO pin Output Level */
+
+
+  /*Configure GPIO pins : CO2_PWR_Pin Screen_CS_Pin */
+  GPIO_InitStruct.Pin = Screen_CS_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : Screen_PWR_Pin SD_PWR_Pin SD_CS_Pin D_C_Pin */
+  GPIO_InitStruct.Pin = D_C_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : Screen_Busy_Pin */
+  GPIO_InitStruct.Pin = Screen_Busy_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(Screen_Busy_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : Screen_Res_Pin */
+  GPIO_InitStruct.Pin = Screen_Res_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(Screen_Res_GPIO_Port, &GPIO_InitStruct);
+
 }

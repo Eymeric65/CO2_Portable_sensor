@@ -17,8 +17,6 @@ Core/Src/CO2_probe.o: ../Core/Src/CO2_probe.c ../Core/Inc/CO2_probe.h \
  ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_gpio_ex.h \
  ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_dma.h \
  ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_cortex.h \
- ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_adc.h \
- ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_adc_ex.h \
  ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_flash.h \
  ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_flash_ex.h \
  ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_flash_ramfunc.h \
@@ -29,7 +27,7 @@ Core/Src/CO2_probe.o: ../Core/Src/CO2_probe.c ../Core/Inc/CO2_probe.h \
  ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_rtc.h \
  ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_rtc_ex.h \
  ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_spi.h \
- ../Core/Inc/Display_EPD_W21.h
+ ../Core/Inc/Display_EPD_W21.h ../Core/Inc/main.h
 ../Core/Inc/CO2_probe.h:
 ../Core/Inc/fonts.h:
 ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal.h:
@@ -50,8 +48,6 @@ Core/Src/CO2_probe.o: ../Core/Src/CO2_probe.c ../Core/Inc/CO2_probe.h \
 ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_gpio_ex.h:
 ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_dma.h:
 ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_cortex.h:
-../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_adc.h:
-../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_adc_ex.h:
 ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_flash.h:
 ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_flash_ex.h:
 ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_flash_ramfunc.h:
@@ -63,3 +59,4 @@ Core/Src/CO2_probe.o: ../Core/Src/CO2_probe.c ../Core/Inc/CO2_probe.h \
 ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_rtc_ex.h:
 ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_spi.h:
 ../Core/Inc/Display_EPD_W21.h:
+../Core/Inc/main.h:

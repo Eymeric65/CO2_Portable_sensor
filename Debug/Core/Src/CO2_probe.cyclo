@@ -10,3 +10,5 @@
 ../Core/Src/CO2_probe.c:183:6:Write_nums	2
 ../Core/Src/CO2_probe.c:200:6:Display_Text	1
 ../Core/Src/CO2_probe.c:232:19:Send_I2C_Command	1
+../Core/Src/CO2_probe.c:241:6:SCREEN_GPIO_Act	1
+../Core/Src/CO2_probe.c:291:6:SCREEN_GPIO_Deact	1

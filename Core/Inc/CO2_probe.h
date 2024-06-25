@@ -44,5 +44,9 @@ void Display_Text(Text_Z text, uint8_t * Map,uint8_t * background);
 
 HAL_StatusTypeDef Send_I2C_Command(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t command, uint32_t Timeout);
 
+void SCREEN_GPIO_Deact(void);
+
+void SCREEN_GPIO_Act(void);
+
 
 #endif /* INC_CO2_PROBE_H_ */

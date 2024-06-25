@@ -71,6 +71,8 @@ void Error_Handler(void);
 #define Screen_Busy_GPIO_Port GPIOA
 #define Screen_Res_Pin GPIO_PIN_1
 #define Screen_Res_GPIO_Port GPIOB
+#define D_C_Pin GPIO_PIN_14
+#define D_C_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
 

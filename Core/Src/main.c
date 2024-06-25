@@ -50,8 +50,6 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-ADC_HandleTypeDef hadc;
-
 I2C_HandleTypeDef hi2c1;
 
 RTC_HandleTypeDef hrtc;
@@ -65,7 +63,6 @@ SPI_HandleTypeDef hspi1;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_ADC_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_RTC_Init(void);
@@ -107,17 +104,24 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_ADC_Init();
   MX_I2C1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
+  SCREEN_GPIO_Deact();
 
   uint8_t DrawMap[EPD_ARRAY];
 
   //memset(DrawMap,0xFF,sizeof(DrawMap));
   memcpy(DrawMap,Base_map,sizeof(Base_map));
 
+  //HAL_GPIO_WritePin(GPIOC, CO2_PWR_Pin, GPIO_PIN_SET);
+  //HAL_GPIO_WritePin(GPIOA, Screen_PWR_Pin, GPIO_PIN_SET);
+
+  //HAL_GPIO_WritePin(GPIOA, Screen_PWR_Pin, GPIO_PIN_SET);
+
+  //HAL_GPIO_WritePin(Screen_Res_GPIO_Port, Screen_Res_Pin, GPIO_PIN_RESET);
+  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_14, GPIO_PIN_RESET);
 
   /* USER CODE END 2 */
 
@@ -152,10 +156,27 @@ int main(void)
 //	    //Write_nums(DrawMap, Zone_Write_nums(129,83,FONT_TIME,test.max_y,0,0,4) );
 //
 //
+
+	  // UNCOMMENT THIS
+	  ////HAL_GPIO_WritePin(GPIOA, Screen_PWR_Pin, GPIO_PIN_RESET);
+
+	  SCREEN_GPIO_Act();
+
+	  HAL_Delay(1000);
+
 		EPD_Init(); //Full screen refresh initialization.
 		EPD_WhiteScreen_ALL(DrawMap); //To Display one image using full screen refresh.
 		EPD_DeepSleep(); //Enter the sleep mode and please do not delete it, otherwise it will reduce the lifespan of the screen.
+
+		SCREEN_GPIO_Deact();
+
+//		HAL_GPIO_WritePin(GPIOA, Screen_PWR_Pin, GPIO_PIN_SET);
+//		HAL_GPIO_WritePin(Screen_Res_GPIO_Port, Screen_Res_Pin, GPIO_PIN_RESET);
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_14, GPIO_PIN_RESET);
+	  //------------------------------------
+
 		//HAL_Delay(2000); //Delay for 2s.
+
 
 
 //	    EPD_Init(); //Electronic paper initialization.
@@ -175,64 +196,80 @@ int main(void)
 	    //Send_I2C_Command(&hi2c1, SCD_ADDRESS, (uint16_t ) 0x21ac, 500);
     	HAL_Delay(1000);
 
+    	//while(Send_I2C_Command(&hi2c1, SCD_ADDRESS, (uint16_t ) 0x21ac, 500)!= HAL_OK){HAL_Delay(10);};
+
+    	unsigned int t = 0;
+
 	    while(1)
 	    {
-	    	//Text_Z test =Zone_Write_nums(118,83,FONT_TIME,(uint16_t)2*i,0,0,2);
 
-	    	HAL_GPIO_WritePin(GPIOC, CO2_PWR_Pin, GPIO_PIN_RESET);
-	    	HAL_Delay(1200);
 
-	    	while(Send_I2C_Command(&hi2c1, SCD_ADDRESS, (uint16_t ) 0x21ac, 500)!= HAL_OK){HAL_Delay(100);};
+	    	//UNCOMMENT THIS
+
+
+	    	uint8_t response[9];
+//
+//
+//
+	    	HAL_GPIO_WritePin(GPIOC, CO2_PWR_Pin, GPIO_PIN_RESET); // pin power
+	    	HAL_Delay(300);
+
+	    	while(Send_I2C_Command(&hi2c1, SCD_ADDRESS, (uint16_t ) 0x21b1, 80)!= HAL_OK){HAL_Delay(100);};
 
 	    	HAL_StatusTypeDef ans1 = HAL_ERROR;
 
-	    	uint8_t response[9];
-
 	    	while( ans1 == HAL_ERROR)
 	    	{
-	    	Send_I2C_Command(&hi2c1, SCD_ADDRESS, (uint16_t ) 0xec05, 500);
+	    	Send_I2C_Command(&hi2c1, SCD_ADDRESS, (uint16_t ) 0xec05, 80);
 
 	    	HAL_Delay(1);
 
-	    	ans1 = HAL_I2C_Master_Receive(&hi2c1,SCD_ADDRESS, (uint8_t *) response,9, 500);
-	    	HAL_Delay(500);
+	    	ans1 = HAL_I2C_Master_Receive(&hi2c1,SCD_ADDRESS, (uint8_t *) response,9, 80);
+	    	HAL_Delay(100);
 	    	}
 
-	    	Send_I2C_Command(&hi2c1, SCD_ADDRESS, (uint16_t ) 0x3f86, 500);
-	    	HAL_GPIO_WritePin(GPIOC, CO2_PWR_Pin, GPIO_PIN_SET);
+	    	Send_I2C_Command(&hi2c1, SCD_ADDRESS, (uint16_t ) 0x3f86, 80);
 
-
-
+	    	HAL_GPIO_WritePin(GPIOC, CO2_PWR_Pin, GPIO_PIN_SET); // pin power
+//
+//
+//
+//
 			uint16_t CO2 = (response[0] << 8) | response[1];
-
-
-
-			//HAL_I2C_Master_Receive(&hi2c1,SCD_ADDRESS, (uint8_t *) response,3, 500);
-
 
 			float T =  (response[3] << 8) | response[4];
 
 			T = -45 + 175*T/65536;
 
-
-
-			//HAL_I2C_Master_Receive(&hi2c1,SCD_ADDRESS, (uint8_t *) response,3, 500);
-
 			float H =  (response[6] << 8) | response[7];
 
 			H = 100*H/65536;
 
-			HAL_GPIO_WritePin(GPIOA, Screen_PWR_Pin, GPIO_PIN_RESET);
+			SCREEN_GPIO_Act();
 
-			HAL_Delay(200);
+			HAL_Delay(250);
+
+			t = t+2;
 
 			Display_Text(Zone_Write_nums(64,17,FONT_INFO,(int) T,0,0,4),DrawMap,Base_map );
 			Display_Text(Zone_Write_nums(34,65,FONT_CO2,CO2,0,1,5),DrawMap,Base_map);
 			Display_Text(Zone_Write_nums(20,17,FONT_INFO,(int) H,0,0,4),DrawMap,Base_map );
+
+			Display_Text(Zone_Write_nums(118,83,FONT_TIME,t/60,0,0,5),DrawMap,Base_map ); //Heure
+			Display_Text(Zone_Write_nums(81,83,FONT_TIME,t%60,0,0,2),DrawMap,Base_map ); //Minutes
+
+		    //Write_nums(DrawMap, Zone_Write_nums(118,83,FONT_TIME,20,0,0,4) ); // Heure
+	//	    Write_nums(DrawMap, Zone_Write_nums(81,83,FONT_TIME,test.area_draw,0,0,4) ); // Minutes
+
 			EPD_DeepSleep();
 
-			HAL_GPIO_WritePin(GPIOA, Screen_PWR_Pin, GPIO_PIN_SET);
 
+			SCREEN_GPIO_Deact();
+
+
+			//			HAL_GPIO_WritePin(GPIOA, Screen_PWR_Pin, GPIO_PIN_SET); // pin power
+			//			HAL_GPIO_WritePin(Screen_Res_GPIO_Port, Screen_Res_Pin, GPIO_PIN_RESET);
+			//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_14, GPIO_PIN_RESET);
 
 
 	    	//Display_Text(Zone_Write_nums(118,83,FONT_TIME,(uint16_t)2*i,0,0,2),DrawMap,Base_map); //x,y,DATA-A~E,number,Resolution 32*32
@@ -246,15 +283,21 @@ int main(void)
 
 	    	//HAL_Delay(5000);
 
+			//--------------------------------------
+
             HAL_SuspendTick();
-            HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 40, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
+            HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 120, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
 
             /* Enter STOP 2 mode */
             HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON,  PWR_STOPENTRY_WFI);
+            //HAL_PWR_EnterSTOPMode(PWR_MAINREGULATOR_ON,  PWR_STOPENTRY_WFI);
+
+
             //HAL_PWREx_EnterSTOP2Mode(PWR_STOPENTRY_WFI);
             HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
             SystemClock_Config();
-         HAL_ResumeTick();
+            HAL_ResumeTick();
+
 	    }
         //EPD_DeepSleep();  //Enter the sleep mode and please do not delete it, otherwise it will reduce the lifespan of the screen.
 
@@ -332,62 +375,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-}
-
-/**
-  * @brief ADC Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_ADC_Init(void)
-{
-
-  /* USER CODE BEGIN ADC_Init 0 */
-
-  /* USER CODE END ADC_Init 0 */
-
-  ADC_ChannelConfTypeDef sConfig = {0};
-
-  /* USER CODE BEGIN ADC_Init 1 */
-
-  /* USER CODE END ADC_Init 1 */
-
-  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
-  */
-  hadc.Instance = ADC1;
-  hadc.Init.OversamplingMode = DISABLE;
-  hadc.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV1;
-  hadc.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc.Init.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
-  hadc.Init.ScanConvMode = ADC_SCAN_DIRECTION_FORWARD;
-  hadc.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc.Init.ContinuousConvMode = DISABLE;
-  hadc.Init.DiscontinuousConvMode = DISABLE;
-  hadc.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-  hadc.Init.DMAContinuousRequests = DISABLE;
-  hadc.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-  hadc.Init.Overrun = ADC_OVR_DATA_PRESERVED;
-  hadc.Init.LowPowerAutoWait = DISABLE;
-  hadc.Init.LowPowerFrequencyMode = DISABLE;
-  hadc.Init.LowPowerAutoPowerOff = DISABLE;
-  if (HAL_ADC_Init(&hadc) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure for the selected ADC regular channel to be converted.
-  */
-  sConfig.Channel = ADC_CHANNEL_0;
-  sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
-  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN ADC_Init 2 */
-
-  /* USER CODE END ADC_Init 2 */
-
 }
 
 /**
@@ -536,10 +523,16 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, CO2_PWR_Pin|Screen_CS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(CO2_PWR_GPIO_Port, CO2_PWR_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, Screen_PWR_Pin|SD_PWR_Pin|SD_CS_Pin|GPIO_PIN_14, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(Screen_CS_GPIO_Port, Screen_CS_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, Screen_PWR_Pin|SD_PWR_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, SD_CS_Pin|D_C_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(Screen_Res_GPIO_Port, Screen_Res_Pin, GPIO_PIN_RESET);
@@ -551,8 +544,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Screen_PWR_Pin SD_PWR_Pin SD_CS_Pin PA14 */
-  GPIO_InitStruct.Pin = Screen_PWR_Pin|SD_PWR_Pin|SD_CS_Pin|GPIO_PIN_14;
+  /*Configure GPIO pins : PA0 PA13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : Screen_PWR_Pin SD_PWR_Pin SD_CS_Pin D_C_Pin */
+  GPIO_InitStruct.Pin = Screen_PWR_Pin|SD_PWR_Pin|SD_CS_Pin|D_C_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
