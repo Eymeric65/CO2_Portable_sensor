@@ -116,211 +116,104 @@ int main(void)
   memcpy(DrawMap,Base_map,sizeof(Base_map));
 
   //HAL_GPIO_WritePin(GPIOC, CO2_PWR_Pin, GPIO_PIN_SET);
-  //HAL_GPIO_WritePin(GPIOA, Screen_PWR_Pin, GPIO_PIN_SET);
 
-  //HAL_GPIO_WritePin(GPIOA, Screen_PWR_Pin, GPIO_PIN_SET);
 
-  //HAL_GPIO_WritePin(Screen_Res_GPIO_Port, Screen_Res_Pin, GPIO_PIN_RESET);
-  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_14, GPIO_PIN_RESET);
+    SCREEN_GPIO_Act();
+
+    HAL_Delay(1000);
+
+	EPD_Init(); //Full screen refresh initialization.
+	EPD_WhiteScreen_ALL(DrawMap); //To Display one image using full screen refresh.
+	EPD_DeepSleep(); //Enter the sleep mode and please do not delete it, otherwise it will reduce the lifespan of the screen.
+
+	SCREEN_GPIO_Deact();
+
+	HAL_Delay(1000);
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  HAL_Delay(2000);
+	unsigned int t = 0;
+
   while (1)
   {
-	  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET);
-	  //EPD_Init(); //Full screen refresh initialization.
 
+		//UNCOMMENT THIS
 
-	//	  EPD_WhiteScreen_White(); //Clear screen function.
-	//	  EPD_DeepSleep(); //Enter the sleep mode and please do not delete it, otherwise it will reduce the lifespan of the screen.
+		uint8_t response[9];
+		HAL_GPIO_WritePin(GPIOC, CO2_PWR_Pin, GPIO_PIN_RESET); // pin power
+		HAL_Delay(100);
 
-	//	  HAL_Delay(3000);
+		while(Send_I2C_Command(&hi2c1, SCD_ADDRESS, (uint16_t ) 0x21b1, 20)!= HAL_OK){HAL_Delay(50);};
 
+		HAL_StatusTypeDef ans1 = HAL_ERROR;
 
-	    //Set_pixel(DrawMap,20,20,0);
-	    //Set_pixel(DrawMap,21,20,1);
+		while( ans1 == HAL_ERROR)
+		{
+			Send_I2C_Command(&hi2c1, SCD_ADDRESS, (uint16_t ) 0xec05, 20);
 
-	  	  // Fixed Update
-//
-	    //Text_Z test =Zone_Write_nums(118,83,FONT_TIME,20,0,0,2);
-//
-	    //Write_nums(DrawMap, Zone_Write_nums(118,83,FONT_TIME,20,0,0,4) ); // Heure
-//	    Write_nums(DrawMap, Zone_Write_nums(81,83,FONT_TIME,test.area_draw,0,0,4) ); // Minutes
-//
-//	    Write_nums(DrawMap, Zone_Write_nums(64,17,FONT_INFO,test.column,0,0,4) ); // Temperature
-//	    Write_nums(DrawMap, Zone_Write_nums(20,17,FONT_INFO,test.line,0,0,4) ); // Humidite
-//	    Write_nums(DrawMap, Zone_Write_nums(34,65,FONT_CO2,test.max_x,1,1,4) ); // CO2
-//	    //Write_nums(DrawMap, Zone_Write_nums(129,83,FONT_TIME,test.max_y,0,0,4) );
-//
-//
+			HAL_Delay(1);
 
-	  // UNCOMMENT THIS
-	  ////HAL_GPIO_WritePin(GPIOA, Screen_PWR_Pin, GPIO_PIN_RESET);
+			ans1 = HAL_I2C_Master_Receive(&hi2c1,SCD_ADDRESS, (uint8_t *) response,9, 20);
+			HAL_Delay(50);
+		}
 
-	  SCREEN_GPIO_Act();
+		Send_I2C_Command(&hi2c1, SCD_ADDRESS, (uint16_t ) 0x3f86, 20);
 
-	  HAL_Delay(1000);
+		HAL_GPIO_WritePin(GPIOC, CO2_PWR_Pin, GPIO_PIN_SET); // pin power
+//		//
+//		//
+//		//
+//		//
+		uint16_t CO2 = (response[0] << 8) | response[1];
 
-		EPD_Init(); //Full screen refresh initialization.
-		EPD_WhiteScreen_ALL(DrawMap); //To Display one image using full screen refresh.
-		EPD_DeepSleep(); //Enter the sleep mode and please do not delete it, otherwise it will reduce the lifespan of the screen.
+		float T =  (response[3] << 8) | response[4];
 
-		SCREEN_GPIO_Deact();
+		T = -45 + 175*T/65536;
 
-//		HAL_GPIO_WritePin(GPIOA, Screen_PWR_Pin, GPIO_PIN_SET);
-//		HAL_GPIO_WritePin(Screen_Res_GPIO_Port, Screen_Res_Pin, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_14, GPIO_PIN_RESET);
-	  //------------------------------------
+		float H =  (response[6] << 8) | response[7];
 
-		//HAL_Delay(2000); //Delay for 2s.
+		H = 100*H/65536;
 
+		SCREEN_GPIO_Act();
 
+		HAL_Delay(250);
 
-//	    EPD_Init(); //Electronic paper initialization.
-//	    EPD_SetRAMValue_BaseMap(DrawMap); //Please do not delete the background color function, otherwise it will cause unstable display during partial refresh.
-//	    EPD_DeepSleep();
-//	    HAL_Delay(300);
-	    //EPD_SetRAMValue_BaseMap(gImage_basemap);
-//	  for(i=0;i<6;i++)
-//			{
-//      EPD_Dis_Part_Time(8,19,Num[i],Num[0],gImage_numdot,Num[0],Num[1],5,32,48); //x,y,DATA-A~E,number,Resolution 32*48
-//			}
-	    //uint16_t CO2_test_value[8]={250,25,6,124,4000,430,1780,1020};
+		t = t+2;
 
+		Display_Text(Zone_Write_nums(64,17,FONT_INFO,(int) T,0,0,4),DrawMap,Base_map );
+		Display_Text(Zone_Write_nums(34,65,FONT_CO2,CO2,0,1,5),DrawMap,Base_map);
+		Display_Text(Zone_Write_nums(20,17,FONT_INFO,(int) H,0,0,4),DrawMap,Base_map );
 
-    	//Send_I2C_Command(&hi2c1, SCD_ADDRESS, (uint16_t ) 0x21b1, 500); // high power
+		Display_Text(Zone_Write_nums(118,83,FONT_TIME,t/60,0,0,5),DrawMap,Base_map ); //Heure
+		Display_Text(Zone_Write_nums(81,83,FONT_TIME,t%60,0,0,2),DrawMap,Base_map ); //Minutes
 
-	    //Send_I2C_Command(&hi2c1, SCD_ADDRESS, (uint16_t ) 0x21ac, 500);
-    	HAL_Delay(1000);
-
-    	//while(Send_I2C_Command(&hi2c1, SCD_ADDRESS, (uint16_t ) 0x21ac, 500)!= HAL_OK){HAL_Delay(10);};
-
-    	unsigned int t = 0;
-
-	    while(1)
-	    {
-
-
-	    	//UNCOMMENT THIS
-
-
-	    	uint8_t response[9];
+		EPD_DeepSleep();
 //
 //
+
+
 //
-	    	HAL_GPIO_WritePin(GPIOC, CO2_PWR_Pin, GPIO_PIN_RESET); // pin power
-	    	HAL_Delay(300);
-
-	    	while(Send_I2C_Command(&hi2c1, SCD_ADDRESS, (uint16_t ) 0x21b1, 80)!= HAL_OK){HAL_Delay(100);};
-
-	    	HAL_StatusTypeDef ans1 = HAL_ERROR;
-
-	    	while( ans1 == HAL_ERROR)
-	    	{
-	    	Send_I2C_Command(&hi2c1, SCD_ADDRESS, (uint16_t ) 0xec05, 80);
-
-	    	HAL_Delay(1);
-
-	    	ans1 = HAL_I2C_Master_Receive(&hi2c1,SCD_ADDRESS, (uint8_t *) response,9, 80);
-	    	HAL_Delay(100);
-	    	}
-
-	    	Send_I2C_Command(&hi2c1, SCD_ADDRESS, (uint16_t ) 0x3f86, 80);
-
-	    	HAL_GPIO_WritePin(GPIOC, CO2_PWR_Pin, GPIO_PIN_SET); // pin power
+//		//--------------------------------------
 //
-//
-//
-//
-			uint16_t CO2 = (response[0] << 8) | response[1];
+	  HAL_GPIO_WritePin(GPIOC, CO2_PWR_Pin, GPIO_PIN_SET);
+	  SCREEN_GPIO_Deact();
 
-			float T =  (response[3] << 8) | response[4];
+		HAL_SuspendTick();
+		HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 600, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
 
-			T = -45 + 175*T/65536;
-
-			float H =  (response[6] << 8) | response[7];
-
-			H = 100*H/65536;
-
-			SCREEN_GPIO_Act();
-
-			HAL_Delay(250);
-
-			t = t+2;
-
-			Display_Text(Zone_Write_nums(64,17,FONT_INFO,(int) T,0,0,4),DrawMap,Base_map );
-			Display_Text(Zone_Write_nums(34,65,FONT_CO2,CO2,0,1,5),DrawMap,Base_map);
-			Display_Text(Zone_Write_nums(20,17,FONT_INFO,(int) H,0,0,4),DrawMap,Base_map );
-
-			Display_Text(Zone_Write_nums(118,83,FONT_TIME,t/60,0,0,5),DrawMap,Base_map ); //Heure
-			Display_Text(Zone_Write_nums(81,83,FONT_TIME,t%60,0,0,2),DrawMap,Base_map ); //Minutes
-
-		    //Write_nums(DrawMap, Zone_Write_nums(118,83,FONT_TIME,20,0,0,4) ); // Heure
-	//	    Write_nums(DrawMap, Zone_Write_nums(81,83,FONT_TIME,test.area_draw,0,0,4) ); // Minutes
-
-			EPD_DeepSleep();
+		/* Enter STOP 2 mode */
+		HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON,  PWR_STOPENTRY_WFI);
+		//HAL_PWR_EnterSTOPMode(PWR_MAINREGULATOR_ON,  PWR_STOPENTRY_WFI);
 
 
-			SCREEN_GPIO_Deact();
+		//HAL_PWREx_EnterSTOP2Mode(PWR_STOPENTRY_WFI);
+		HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
+		SystemClock_Config();
+		HAL_ResumeTick();
 
 
-			//			HAL_GPIO_WritePin(GPIOA, Screen_PWR_Pin, GPIO_PIN_SET); // pin power
-			//			HAL_GPIO_WritePin(Screen_Res_GPIO_Port, Screen_Res_Pin, GPIO_PIN_RESET);
-			//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_14, GPIO_PIN_RESET);
-
-
-	    	//Display_Text(Zone_Write_nums(118,83,FONT_TIME,(uint16_t)2*i,0,0,2),DrawMap,Base_map); //x,y,DATA-A~E,number,Resolution 32*32
-	    	//Display_Text(Zone_Write_nums(81,83,FONT_TIME,(uint16_t)60-i*5,0,0,2),DrawMap,Base_map); //x,y,DATA-A~E,number,Resolution 32*32
-
-	    	//Display_Text(Zone_Write_nums(64,17,FONT_INFO,(uint16_t)i*3,0,0,2),DrawMap,Base_map); //x,y,DATA-A~E,number,Resolution 32*32
-	    	//Display_Text(Zone_Write_nums(20,17,FONT_INFO,(uint16_t)60-3*i,0,0,2),DrawMap,Base_map); //x,y,DATA-A~E,number,Resolution 32*32
-
- //x,y,DATA-A~E,number,Resolution 32*32
-	    	//EPD_WhiteScreen_ALL(DrawMap);
-
-	    	//HAL_Delay(5000);
-
-			//--------------------------------------
-
-            HAL_SuspendTick();
-            HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 120, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
-
-            /* Enter STOP 2 mode */
-            HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON,  PWR_STOPENTRY_WFI);
-            //HAL_PWR_EnterSTOPMode(PWR_MAINREGULATOR_ON,  PWR_STOPENTRY_WFI);
-
-
-            //HAL_PWREx_EnterSTOP2Mode(PWR_STOPENTRY_WFI);
-            HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
-            SystemClock_Config();
-            HAL_ResumeTick();
-
-	    }
-        //EPD_DeepSleep();  //Enter the sleep mode and please do not delete it, otherwise it will reduce the lifespan of the screen.
-
-        HAL_Delay(500);
-
-  	    EPD_Init(); //Full screen refresh initialization.
-  		EPD_WhiteScreen_White(); //Clear screen function.
-     	EPD_DeepSleep(); //Enter the sleep mode and please do not delete it, otherwise it will reduce the lifespan of the screen.
-
-
-
-//      HAL_Delay(2000); //Delay for 2s.
-
-//      EPD_Init(); //Full screen refresh initialization.
-//      EPD_WhiteScreen_White(); //Clear screen function.
-//      EPD_DeepSleep(); //Enter the sleep mode and please do not delete it, otherwise it will reduce the lifespan of the screen.
-//      HAL_Delay(2000); //Delay for 2s.
-
-	  while(1)
-	  {
-
-
-	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
